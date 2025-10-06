@@ -1,68 +1,70 @@
-\section{Keretrendszer: Az LLM-alapú APR Tervezési Tere és a Kritikus Kiértékelés}
+\section{Framework: The Design Space of LLM-based APR and Critical Evaluation}
 \label{sec:framework}
 
-Ez a fejezet bemutatja azt a koncepcionális keretrendszert és az osztályozási rendszereket, amelyek mentén az Automated Program Repair (APR) területét, különösen a Large Language Models (LLM) által vezérelt paradigmákat (\emph{LLM-APR}), vizsgáljuk. A keretrendszer kettős célt szolgál: egyrészt osztályozza a legújabb technikákat, másrészt hangsúlyozza az APR-rendszerek \textbf{átfogó, mellékhatásokat is feltáró értékelésének} kritikus szükségességét.
+This section outlines the conceptual framework and classification systems used to analyze the field of Automated Program Repair (APR), particularly focusing on Large Language Model (LLM) driven paradigms (\emph{LLM-APR}) [1]. This framework serves a dual purpose: first, classifying the latest LLM-APR techniques based on their design choices, and second, emphasizing the critical need for a \textbf{comprehensive evaluation} of APR systems that extends beyond simple fix rates to detect harmful side effects [2, 3].
 
-\subsection{Az LLM-alapú APR módszertanok taxonómiája}
+\subsection{Taxonomy of LLM-based APR Methodologies}
 \label{ssec:taxonomy}
 
-A vizsgált szakirodalom a 2022 januárja és 2025 júniusa között megjelent \textbf{63 LLM-APR rendszert} [1] négy alapvető paradigmába sorolja, amelyeket a modell \emph{paraméterei} és a \emph{vezérlési áramlás} közötti tervezési kompromisszumok definiálnak [1-3]:
+Code-focused LLMs, such as OpenAI's Codex, CodeLlama, and DeepSeek-Coder, have demonstrated the ability to understand and generate code, facilitating bug fixing with minimal human intervention [1]. The current landscape of LLM-APR, spanning January 2022 to June 2025, covers 63 distinct systems [4]. These methods are classified based on the dimensions of model \emph{parameters} (whether they are updated) and \emph{control flow} (who dictates the subsequent step) [4].
 
 \begin{enumerate}
-    \item \textbf{Finomhangolási Megközelítések (Fine-Tuning Approaches)}:
-    Ezek a megközelítések a kódhiba-javítási adatok felhasználásával frissítik az előre betanított LLM súlyait [4]. Előnyük az erős feladat-specifikus illeszkedés és a magas pontosság, de jelentős tréningköltséggel és memóriaterheléssel járnak [1, 5]. Ide tartozik a teljes finomhangolás (Full FT) [6], a \textbf{PEFT} (Parameter-Efficient Fine-Tuning) [5, 7], a tudásdesztilláció (Knowledge Distilling) [4] és a megerősítéses tanulás (Reinforcement Learning Fine-Tuning, RLFT) [7].
-    
-    \item \textbf{Utasításalapú Megközelítések (Prompting Approaches)}:
-    Az LLM egy \textbf{fagyasztott komponensként} (frozen component) működik, amely egyetlen lekérdezés után teljes javítást ad [1, 8]. Ez a módszer gyorsan telepíthető és nem igényel extra tréninget [8, 9]. Hatékonysága azonban nagymértékben függ az utasítás (prompt) aprólékos megtervezésétől, és korlátozza a kontextus ablak mérete [1, 8, 10]. Főbb típusai a \emph{Zero-shot} (csak a hibás kód) és a \emph{Few-shot} (néhány példa bemutatása) [9-11].
+    \item \textbf{Fine-Tuning (FT) Approaches}:
+    These methods update the weights of pre-trained LLMs using datasets of bug-fix pairs, resulting in strong task-specific adaptation and higher accuracy [5, 6]. Variants include Full Fine-Tuning (e.g., VulMaster, RepairCAT) [4, 7], Parameter-Efficient Fine-Tuning (PEFT, e.g., RepairLLaMA, MORepair) [4, 7, 8], Knowledge Distilling (e.g., KNOD, DistiLRR) [4, 9, 10], and Reinforcement Learning Fine-Tuning (RLFT) [4, 10]. A drawback of full FT is its heavy GPU demand and frequent overfitting to the suspected bug location [6].
 
-    \item \textbf{Eljárásalapú Folyamatok (Procedural Pipelines)}:
-    Az APR rögzített munkafolyamatként (fixed pipeline) működik, ahol az LLM-et csak \textbf{scriptelt ellenőrzőpontoknál} hívják meg [1, 12]. Ez a módszer reprodukálható kimenetet és kiszámítható költséget eredményez [12]. Példák erre a \emph{Test-in-the-Loop} (ismételt tesztfuttatással) és a \emph{Human-in-the-Loop} (emberi visszajelzés beiktatásával) [7, 12, 13].
+    \item \textbf{Prompting Approaches}:
+    The pre-trained model remains \textbf{frozen} and generates a patch in a single turn [11]. Deployment is rapid as it requires no additional training cost [11].
+    \begin{itemize}
+        \item \emph{Zero-Shot Prompting}: Provides only the buggy code and a terse instruction (e.g., "fix the bug") [11]. Early studies showed that zero-shot LLMs (like Codex) could outperform state-of-the-art APR techniques, but performance is sensitive to subtle prompt edits [11, 12].
+        \item \emph{Few-Shot Prompting}: Includes a small set of bug-fix exemplars before the target defect to infer an edit pattern, often stabilizing generation and improving accuracy [13]. The success of this approach relies on careful curation or automated retrieval of highly similar examples [14, 15].
+    \end{itemize}
 
-    \item \textbf{Ügynök Alapú Keretrendszerek (Agentic Frameworks)}:
-    Ebben a kategóriában a modell maga \textbf{delegálja a következő lépés kiválasztását}, megvalósítva az öntanuló rendszert [1, 14]. Bár komplexitást és késleltetést okoz, képes kezelni a komplex, több fájlt érintő hibákat (multi-hunk, cross-file bugs) [1]. Ide tartoznak az eszközökkel kiegészített ügynökök (Tool-Augmented Agents) és az LLM-ek bírálóként (LLM-as-Judges) történő alkalmazása a javítási jelöltek rangsorolására [14].
+    \item \textbf{Procedural Pipelines}:
+    LLM calls are embedded into fixed, multi-step workflows to ensure reproducible output [4]. Examples include iterative testing loops (\emph{Test-in-the-Loop}, e.g., ChatRepair, ThinkRepair) [4, 16] and human intervention protocols (\emph{Human-in-the-Loop}, e.g., CREF) [4].
+
+    \item \textbf{Agentic Frameworks}:
+    The LLM operates as an autonomous agent that \textbf{decides the next step} and invokes external tools (such as testing, compilation, or static analysis) [4, 17].
+    \begin{itemize}
+        \item \emph{Tool-Augmented Agents} (e.g., SWE-Agent, RepairAgent, LANTERN): These agents improve over one-shot prompting by allowing the LLM to choose external actions [17, 18].
+        \item \emph{LLM-as-Judges} (e.g., VulSifter, LLM4PatchCorrect): Models are used as critics to rank or refine patch candidates based on various criteria [4, 18, 19].
+    \end{itemize}
 \end{enumerate}
 
-\subsubsection*{Keresztvágó Kiegészítő Rétegek (Cross-Cutting Augmentations)}
-A négy paradigmát kiegészítheti két fejlesztési réteg, amelyek gazdagítják az LLM-ek inputját:
+\subsubsection*{Cross-Cutting Augmentation Layers}
+The efficacy of these paradigms is frequently enhanced by augmenting the context provided to the LLM:
 \begin{itemize}
-    \item \textbf{RAG} (\emph{Retrieval-Augmented Generation}): Külső tudás (pl. releváns kódrészletek, dokumentáció, történelmi javítások) beemelése a promptba [2, 15].
-    \item \textbf{AAG} (\emph{Analysis-Augmented Generation}): Programanalízis eredményeinek (pl. statikus/dinamikus analízis logjai, hiba nyomkövetések) felhasználása a modell kimenetének korlátozására vagy irányítására [2, 16].
+    \item \textbf{RAG} (\emph{Retrieval-Augmented Generation}): Incorporates external, high-signal structural context, such as relevant code snippets fetched from a repository using a Knowledge Graph (e.g., KGCompass) or dynamically collected failing assertions (e.g., D4C) [20-22].
+    \item \textbf{AAG} (\emph{Analysis-Augmented Generation}): Integrates results from program analysis tools, such as semantic scoping (Appatch) or static analysis logs, to guide the model's output [21].
 \end{itemize}
 
-\subsection{Az APR-rendszerek kritikus kiértékelési keretrendszere}
+\subsection{A Critical Framework for APR System Evaluation}
 \label{ssec:evaluation}
 
-A modern LLM-alapú APR-rendszerek megbízhatóságának biztosításához elengedhetetlen egy átfogó értékelési módszertan, amely túlmutat a puszta javítási sikerességi rátán (\emph{fix rate}) [1, 17, 18]. A hagyományos értékelések gyakran figyelmen kívül hagyják a \textbf{potenciális mellékhatásokat} (\emph{side effects}) [17, 18].
-
-A források által támogatott, Sorald esettanulmányon [17, 18] is demonstrált átfogó kiértékelési keretrendszer az alábbi kulcsterületekre fókuszál:
+The evolution of APR evaluation has shifted from measuring the plausibility of generated patches to accurately counting \textbf{correct patches}, primarily due to the widespread issue of \textbf{overfitting} to test suites [2, 23, 24]. To rigorously validate LLM-APR tools, a comprehensive evaluation framework must analyze three critical factors beyond simple test passing:
 
 \begin{enumerate}
-    \item \textbf{Új Hibák Bevezetése (\emph{New Violations})}:
-    Vizsgálni kell, hogy a javítási folyamat során bevezetődnek-e új hibák (\emph{bugs}) vagy kód szagok (\emph{code smells}) [17, 18]. Egy tanulmány szerint a Sorald nevű eszköz 3529 SonarQube hiba javítása során \textbf{2120 új hibát} (köztük 32 bugot és 2088 code smell-t) vezetett be [17-19].
+    \item \textbf{New Violations and Code Smells}:
+    It is crucial to assess whether the repair process introduces new coding defects or code smells [25, 26]. The Sorald case study demonstrated that while fixing SonarQube issues, the tool introduced \textbf{2120 new violations} (including 32 bugs and 2088 code smells) [26, 27].
 
-    \item \textbf{Funkcionális Korrektség és Szemantika Megőrzése (\emph{Semantic Preservation})}:
-    Feltétlenül ellenőrizni kell, hogy a generált javítás nem változtatja-e meg a program eredeti funkcionalitását és szemantikáját [20, 21]. A kiértékelés kulcsfontosságú része a korábban átment \textbf{unit tesztek futtatása} a javított kódon [21, 22]. A Sorald-javítások következtében a tesztek \textbf{24\%-a elbukott} (1962/8212 eset) fordítási hibák vagy a kód viselkedésének tényleges megváltozása miatt [23, 24].
+    \item \textbf{Functional Correctness and Semantic Preservation}:
+    APR evaluation must verify that the generated patch maintains the original program's intended behavior [28]. This is typically validated by rerunning the original \textbf{unit tests} on the patched code [3].
 
-    \item \textbf{Kódstruktúra Romlása (\emph{Code Structure Degradation})}:
-    Meg kell mérni, hogy a javítás hogyan befolyásolja a kód karbantarthatóságát és olvashatóságát, mértékegységek (pl. CK metrikák) használatával [20, 21, 25]. A Sorald javításai jelentősen \textbf{növelték az LCOM1, LOC és WMC} (Weighted Methods per Class) metrikákat, ezáltal rontották a kód kohézióját és növelték a komplexitást [24, 26].
+    \item \textbf{Code Structure Degradation}:
+    The impact of the repair on code quality and maintainability must be measured [25]. Metrics from the Chidamber and Kemerer (CK) metrics suite, such as WMC (Weighted Methods per Class), DIT (Depth of Inheritance Tree), CBO (Coupling Between Objects), LCOM1 (Lack of Cohesion of Methods), and LOC (Lines of Code), are used for this analysis [25, 29-31]. Statistical analysis (e.g., Wilcoxon signed rank test) is necessary to determine if metrics significantly change post-repair [25, 29]. For instance, Sorald repairs were found to increase metrics like LCOM1, LOC, and WMC, indicating a degradation of code quality [29].
+\end{enumerate}
 
-\subsection{Különleges kihívás: Konkurens programozási hibák analízise}
+\subsection{Special Challenge: Concurrency Bug Analysis}
 \label{ssec:concurrency}
-\end{enumerate}
 
-A modern szoftverekhez elengedhetetlen a konkurrenciai viselkedés megbízható analízise, mivel az LLM-ek itt is jelentős kihívásokkal néznek szembe [27].
+Concurrency remains a significant challenge for automated tools, including LLMs, due to the inherent \textbf{non-determinism} and the subtle interactions between threads, which lead to an "astronomical number of interleavings" [32-35].
 
 \begin{enumerate}
-    \item \textbf{A Konkurenciai Hibák Természete}:
-    A párhuzamos programok inherent \textbf{nem-determinisztikus} természete megnehezíti a hibák reprodukálását és javítását [27-29]. A leggyakoribb és legsúlyosabb konkurrenciai hibák közé tartoznak az \textbf{adatversenyek} (\emph{data races}) és a \textbf{holtpontok} (\emph{deadlocks}) [30, 31]. A Major súlyozású konkurrenciai hibák között az adatversenyek teszik ki a legmagasabb arányt (30\%-48\%) [31].
+    \item \textbf{Nature of Concurrency Bugs}:
+    \textbf{Data races} (race condition vulnerabilities) are the most prevalent concurrency bugs, accounting for a staggering **80\%** of all such defects [36]. \textbf{Deadlocks} are also critical issues in complex environments, particularly in cloud infrastructures [37, 38]. Concurrency bugs are statistically different from non-concurrency bugs in terms of required \textbf{fixing time} and \textbf{severity} [38-40]. Fixing Deadlock bugs and Data Race bugs has shown a "large" effect size difference in fixing time [41].
 
-    \item \textbf{Relaxált Memória Modellek (RMM)}:
-    A hibák verifikálását tovább bonyolítja, hogy a modern architektúrák (pl. ARM, x86) Relaxált Memória Modelleket (RMM), mint például a \textbf{Total Store Order (TSO)} vagy a \textbf{Partial Store Order (PSO)} [27, 32], alkalmaznak, szemben a Szekvenciálisan Konzisztenst (SC) modellel.
-    
-    \item \textbf{LLM-ek Képességei Konkurenciában}:
-    Az LLM-ek értékelése során kiderült, hogy bár a GPT-4 képes \textbf{magas szinten érteni} az RMM-ek koncepcióit és természetes nyelven magyarázni a lehetséges kockázatokat [33, 34], a teljesítményük még mindig \textbf{messze van a dedikált formális verifikációs eszközöktől} a pontos analízisben [35]. Ez hangsúlyozza, hogy az LLM-APR rendszereknek integrálniuk kell a program analízist (AAG) a megbízható konkurenciai javításhoz [2].
+    \item \textbf{Formal Concurrency Analysis}:
+    Dedicated tools like **ConcBugAssist** utilize constraint solving and bounded model checking to diagnose failures in multithreaded C programs. This process localizes the \textbf{minimal subset of inter-thread ordering constraints} responsible for an assertion failure, which greatly aids comprehension compared to analyzing full execution traces [34, 42-44]. Tools designed for specific concurrency models, such as GCatch, detect **BMOC** (Blocking Multiple Operations on Channel) bugs in Go by building dependency graphs and using Z3 constraints to ensure no perpetual blocking occurs [45-47].
 
-    \item \textbf{Javítási Stratégiák Konkurenciához}:
-    A hagyományos rendszerek (pl. ConcBugAssist) a hiba okának diagnosztizálására a \textbf{szálak közötti rendezési kényszerek} (\emph{inter-thread ordering constraints}) mininális halmazát lokalizálják, és ezt használják a javítások (pl. szinkronizációs primitívek hozzáadása) kiszámításához [36-39].
+    \item \textbf{LLM Performance in Concurrency Verification}:
+    The ability of LLMs to verify concurrent programs must be assessed under specific memory models, including the standard Sequential Consistency (SC) and more challenging \textbf{Relaxed Memory Models (RMM)} [48]. Evaluation involves targeted questions (Q1-Q5) covering program comprehension, concurrency issue identification (data race, deadlock), and verification under both SC and RMM [48].
 \end{enumerate}
-
