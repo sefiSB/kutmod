@@ -69,7 +69,7 @@ Concurrency remains a significant challenge for automated tools, including LLMs,
     The ability of LLMs to verify concurrent programs must be assessed under specific memory models, including the standard Sequential Consistency (SC) and more challenging \textbf{Relaxed Memory Models (RMM)} [48]. Evaluation involves targeted questions (Q1-Q5) covering program comprehension, concurrency issue identification (data race, deadlock), and verification under both SC and RMM [48].
 \end{enumerate}
 
-\section{Classification and Trends in AI-Based APR}
+\subsection{Classification and Trends in AI-Based APR}
 
 Automated Program Repair (APR) methodologies are systematically classified based on a dual perspective, reflecting the evolution and current state of the art [24].
 
@@ -82,7 +82,7 @@ APR methods are categorized by their underlying \textbf{Learning Paradigm} and t
 \end{enumerate}
 The dominant target programming language in APR research remains Java (68.3\%), suggesting potential for expansion into other languages [25].
 
-\section{Deep Learning and Large Language Models (LLMs) in Repair}
+\subsection{Deep Learning and Large Language Models (LLMs) in Repair}
 
 Deep Learning (DL) methods represent the current frontier in APR, aiming to enhance software reliability and maintainability by automatically generating patches [166].
 
@@ -96,11 +96,11 @@ Deep Learning (DL) methods represent the current frontier in APR, aiming to enha
 \subsection{Effectiveness by Bug Type}
 Deep Learning techniques have proven highly effective for certain bug categories. For instance, \textbf{Syntax errors} exhibit the highest success rate (90–95\%) among all bug types addressed by APR. This success is often attributed to specialized tools like \emph{SynFix} (which uses LSTM networks) and \emph{Sensibility} (which uses n-gram models) [41].
 
-\section{Advanced Paradigms and Optimization}
+\subsection{Advanced Paradigms and Optimization}
 
 Current research directions focus on improving the accuracy, efficiency, and context-awareness of AI-based APR systems [19].
 
-\subsection{Context-Aware APR}
+\subsubsection{Context-Aware APR}
 A crucial approach involves developing context-aware APR systems that improve repair accuracy by utilizing diverse information such as bug reports, code surroundings, and semantic relationships [19, 49].
 \begin{itemize}
     \item \textbf{iFixR}: Automates repairs by mining and clustering fix patterns from active project repositories, leveraging bug-fixing commits and prioritizing patches that match successful historical repairs [31, 49].
