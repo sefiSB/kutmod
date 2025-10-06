@@ -68,3 +68,51 @@ Concurrency remains a significant challenge for automated tools, including LLMs,
     \item \textbf{LLM Performance in Concurrency Verification}:
     The ability of LLMs to verify concurrent programs must be assessed under specific memory models, including the standard Sequential Consistency (SC) and more challenging \textbf{Relaxed Memory Models (RMM)} [48]. Evaluation involves targeted questions (Q1-Q5) covering program comprehension, concurrency issue identification (data race, deadlock), and verification under both SC and RMM [48].
 \end{enumerate}
+
+\section{Classification and Trends in AI-Based APR}
+
+Automated Program Repair (APR) methodologies are systematically classified based on a dual perspective, reflecting the evolution and current state of the art [24].
+
+\subsection{Categorization of APR Approaches}
+APR methods are categorized by their underlying \textbf{Learning Paradigm} and their \textbf{Fundamental Approach Type} [24].
+
+\begin{enumerate}
+    \item \textbf{Learning Paradigms}: The literature shows an equal representation of \textbf{Supervised} (46.3\%) and \textbf{Unsupervised} (46.3\%) learning approaches [25]. \textbf{Reinforcement Learning} (RL) has seen limited exploration, accounting for only 7.4\% [25].
+    \item \textbf{Fundamental Approach Types}: While traditional \textbf{Template-Based} methods constituted a significant portion (29.3\%), there is a clear evolution toward \textbf{Deep Learning (DL)} solutions (43.9\%) in recent years [25]. This shift indicates the growing reliance on advanced AI models for tackling repair tasks [17].
+\end{enumerate}
+The dominant target programming language in APR research remains Java (68.3\%), suggesting potential for expansion into other languages [25].
+
+\section{Deep Learning and Large Language Models (LLMs) in Repair}
+
+Deep Learning (DL) methods represent the current frontier in APR, aiming to enhance software reliability and maintainability by automatically generating patches [166].
+
+\subsection{Core DL Architectures and Tools}
+\begin{enumerate}
+    \item \textbf{T5APR (Text-To-Text Automated Program Repair)}: This is a novel neural program repair approach that provides a unified solution for bug fixing across multiple programming languages, including Java, Python, C, and JavaScript [162, 166]. T5APR leverages \textbf{CodeT5}, a powerful pre-trained text-to-text transformer model [163, 166]. It employs a \textbf{checkpoint ensemble strategy} during inference to improve patch recommendations [163, 166] and works by generating candidate patches based on learned contextual information, which are then validated by test cases [164].
+    \item \textbf{DeepFix}: This tool addresses common C programming errors using a multilayered sequence-to-sequence neural network with attention, often trained on student-submitted erroneous programs. DeepFix can achieve significant success in automated bug fixing without external error localization tools, relying on compiler-verified iterative corrections [32, 49].
+    \item \textbf{CodeBERT}: This is a bimodal pretrained model built on a transformer architecture, utilizing a hybrid objective function that combines masked language modeling with token detection to understand both programming and natural languages [32].
+\end{enumerate}
+
+\subsection{Effectiveness by Bug Type}
+Deep Learning techniques have proven highly effective for certain bug categories. For instance, \textbf{Syntax errors} exhibit the highest success rate (90–95\%) among all bug types addressed by APR. This success is often attributed to specialized tools like \emph{SynFix} (which uses LSTM networks) and \emph{Sensibility} (which uses n-gram models) [41].
+
+\section{Advanced Paradigms and Optimization}
+
+Current research directions focus on improving the accuracy, efficiency, and context-awareness of AI-based APR systems [19].
+
+\subsection{Context-Aware APR}
+A crucial approach involves developing context-aware APR systems that improve repair accuracy by utilizing diverse information such as bug reports, code surroundings, and semantic relationships [19, 49].
+\begin{itemize}
+    \item \textbf{iFixR}: Automates repairs by mining and clustering fix patterns from active project repositories, leveraging bug-fixing commits and prioritizing patches that match successful historical repairs [31, 49].
+    \item \textbf{CURE}: Employs a fine-tuned transformer model to capture the rich context of code snippets, utilizing the attention mechanism to capture long-range dependencies and semantic relationships for semantically coherent repairs [49].
+    \item \textbf{DeepFix} and \textbf{SimFix}: DeepFix captures contextual information by processing code segments sequentially using an encoder-decoder architecture, while SimFix combines existing patches and similar code snippets based on the error context [49].
+\end{itemize}
+
+\subsection{Hybrid and Resource-Efficient Approaches}
+The goal of resource efficiency (RQ3) aims to make DL-based APR more accessible for practical applications through techniques like transfer learning, model compression, and hybrid analysis [19, 47, 48].
+
+\begin{itemize}
+    \item \textbf{Hybrid Approaches}: Systems like \textbf{RewardRepair} adopt a Neural Machine Translation (NMT) approach, integrating both syntactic (code context-aware learning) and semantic (compilation and test execution feedback) information to ensure patches are syntactically correct and semantically valid [45, 47].
+    \item \textbf{LLM Optimization}: Leveraging large language models (LLMs) has led to resource-efficient tools, such as \textbf{PyDex} (which uses multi-modal prompts and iterative querying, achieving a high repair rate of 96.5\% using few-shot learning) and \textbf{RepairCAT} (which fine-tunes the StarCoder-1B model) [47].
+    \item \textbf{Optimization Strategies}: Techniques such as iterative repair paradigms (like \textbf{ITER}), transfer learning for specialization (like \textbf{VRepair} for vulnerability repair), and two-stage approaches (like \textbf{CodeReviser}) are used to optimize resource usage and computational overhead [47]. Transfer learning and model compression are essential for developing effective, scalable, and efficient DL-based APR solutions [48].
+\end{itemize}
