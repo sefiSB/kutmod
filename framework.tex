@@ -1,118 +1,41 @@
 \section{Framework: The Design Space of LLM-based APR and Critical Evaluation}
 \label{sec:framework}
 
-This section outlines the conceptual framework and classification systems used to analyze the field of Automated Program Repair (APR), particularly focusing on Large Language Model (LLM) driven paradigms (\emph{LLM-APR}) [1]. This framework serves a dual purpose: first, classifying the latest LLM-APR techniques based on their design choices, and second, emphasizing the critical need for a \textbf{comprehensive evaluation} of APR systems that extends beyond simple fix rates to detect harmful side effects [2, 3].
-
-\subsection{Taxonomy of LLM-based APR Methodologies}
-\label{ssec:taxonomy}
-
-Code-focused LLMs, such as OpenAI's Codex, CodeLlama, and DeepSeek-Coder, have demonstrated the ability to understand and generate code, facilitating bug fixing with minimal human intervention [1]. The current landscape of LLM-APR, spanning January 2022 to June 2025, covers 63 distinct systems [4]. These methods are classified based on the dimensions of model \emph{parameters} (whether they are updated) and \emph{control flow} (who dictates the subsequent step) [4].
-
-\begin{enumerate}
-    \item \textbf{Fine-Tuning (FT) Approaches}:
-    These methods update the weights of pre-trained LLMs using datasets of bug-fix pairs, resulting in strong task-specific adaptation and higher accuracy [5, 6]. Variants include Full Fine-Tuning (e.g., VulMaster, RepairCAT) [4, 7], Parameter-Efficient Fine-Tuning (PEFT, e.g., RepairLLaMA, MORepair) [4, 7, 8], Knowledge Distilling (e.g., KNOD, DistiLRR) [4, 9, 10], and Reinforcement Learning Fine-Tuning (RLFT) [4, 10]. A drawback of full FT is its heavy GPU demand and frequent overfitting to the suspected bug location [6].
-
-    \item \textbf{Prompting Approaches}:
-    The pre-trained model remains \textbf{frozen} and generates a patch in a single turn [11]. Deployment is rapid as it requires no additional training cost [11].
-    \begin{itemize}
-        \item \emph{Zero-Shot Prompting}: Provides only the buggy code and a terse instruction (e.g., "fix the bug") [11]. Early studies showed that zero-shot LLMs (like Codex) could outperform state-of-the-art APR techniques, but performance is sensitive to subtle prompt edits [11, 12].
-        \item \emph{Few-Shot Prompting}: Includes a small set of bug-fix exemplars before the target defect to infer an edit pattern, often stabilizing generation and improving accuracy [13]. The success of this approach relies on careful curation or automated retrieval of highly similar examples [14, 15].
-    \end{itemize}
-
-    \item \textbf{Procedural Pipelines}:
-    LLM calls are embedded into fixed, multi-step workflows to ensure reproducible output [4]. Examples include iterative testing loops (\emph{Test-in-the-Loop}, e.g., ChatRepair, ThinkRepair) [4, 16] and human intervention protocols (\emph{Human-in-the-Loop}, e.g., CREF) [4].
-
-    \item \textbf{Agentic Frameworks}:
-    The LLM operates as an autonomous agent that \textbf{decides the next step} and invokes external tools (such as testing, compilation, or static analysis) [4, 17].
-    \begin{itemize}
-        \item \emph{Tool-Augmented Agents} (e.g., SWE-Agent, RepairAgent, LANTERN): These agents improve over one-shot prompting by allowing the LLM to choose external actions [17, 18].
-        \item \emph{LLM-as-Judges} (e.g., VulSifter, LLM4PatchCorrect): Models are used as critics to rank or refine patch candidates based on various criteria [4, 18, 19].
-    \end{itemize}
-\end{enumerate}
-
-\subsubsection*{Cross-Cutting Augmentation Layers}
-The efficacy of these paradigms is frequently enhanced by augmenting the context provided to the LLM:
-\begin{itemize}
-    \item \textbf{RAG} (\emph{Retrieval-Augmented Generation}): Incorporates external, high-signal structural context, such as relevant code snippets fetched from a repository using a Knowledge Graph (e.g., KGCompass) or dynamically collected failing assertions (e.g., D4C) [20-22].
-    \item \textbf{AAG} (\emph{Analysis-Augmented Generation}): Integrates results from program analysis tools, such as semantic scoping (Appatch) or static analysis logs, to guide the model's output [21].
-\end{itemize}
-
-\subsection{A Critical Framework for APR System Evaluation}
-\label{ssec:evaluation}
-
-The evolution of APR evaluation has shifted from measuring the plausibility of generated patches to accurately counting \textbf{correct patches}, primarily due to the widespread issue of \textbf{overfitting} to test suites [2, 23, 24]. To rigorously validate LLM-APR tools, a comprehensive evaluation framework must analyze three critical factors beyond simple test passing:
-
-\begin{enumerate}
-    \item \textbf{New Violations and Code Smells}:
-    It is crucial to assess whether the repair process introduces new coding defects or code smells [25, 26]. The Sorald case study demonstrated that while fixing SonarQube issues, the tool introduced \textbf{2120 new violations} (including 32 bugs and 2088 code smells) [26, 27].
-
-    \item \textbf{Functional Correctness and Semantic Preservation}:
-    APR evaluation must verify that the generated patch maintains the original program's intended behavior [28]. This is typically validated by rerunning the original \textbf{unit tests} on the patched code [3].
-
-    \item \textbf{Code Structure Degradation}:
-    The impact of the repair on code quality and maintainability must be measured [25]. Metrics from the Chidamber and Kemerer (CK) metrics suite, such as WMC (Weighted Methods per Class), DIT (Depth of Inheritance Tree), CBO (Coupling Between Objects), LCOM1 (Lack of Cohesion of Methods), and LOC (Lines of Code), are used for this analysis [25, 29-31]. Statistical analysis (e.g., Wilcoxon signed rank test) is necessary to determine if metrics significantly change post-repair [25, 29]. For instance, Sorald repairs were found to increase metrics like LCOM1, LOC, and WMC, indicating a degradation of code quality [29].
-\end{enumerate}
-
-\subsection{Special Challenge: Concurrency Bug Analysis}
-\label{ssec:concurrency}
-
-Concurrency remains a significant challenge for automated tools, including LLMs, due to the inherent \textbf{non-determinism} and the subtle interactions between threads, which lead to an "astronomical number of interleavings" [32-35].
-
-\begin{enumerate}
-    \item \textbf{Nature of Concurrency Bugs}:
-    \textbf{Data races} (race condition vulnerabilities) are the most prevalent concurrency bugs, accounting for a staggering **80\%** of all such defects [36]. \textbf{Deadlocks} are also critical issues in complex environments, particularly in cloud infrastructures [37, 38]. Concurrency bugs are statistically different from non-concurrency bugs in terms of required \textbf{fixing time} and \textbf{severity} [38-40]. Fixing Deadlock bugs and Data Race bugs has shown a "large" effect size difference in fixing time [41].
-
-    \item \textbf{Formal Concurrency Analysis}:
-    Dedicated tools like **ConcBugAssist** utilize constraint solving and bounded model checking to diagnose failures in multithreaded C programs. This process localizes the \textbf{minimal subset of inter-thread ordering constraints} responsible for an assertion failure, which greatly aids comprehension compared to analyzing full execution traces [34, 42-44]. Tools designed for specific concurrency models, such as GCatch, detect **BMOC** (Blocking Multiple Operations on Channel) bugs in Go by building dependency graphs and using Z3 constraints to ensure no perpetual blocking occurs [45-47].
-
-    \item \textbf{LLM Performance in Concurrency Verification}:
-    The ability of LLMs to verify concurrent programs must be assessed under specific memory models, including the standard Sequential Consistency (SC) and more challenging \textbf{Relaxed Memory Models (RMM)} [48]. Evaluation involves targeted questions (Q1-Q5) covering program comprehension, concurrency issue identification (data race, deadlock), and verification under both SC and RMM [48].
-\end{enumerate}
-
-\subsection{Classification and Trends in AI-Based APR}
-
-Automated Program Repair (APR) methodologies are systematically classified based on a dual perspective, reflecting the evolution and current state of the art [24].
-
-\subsection{Categorization of APR Approaches}
-APR methods are categorized by their underlying \textbf{Learning Paradigm} and their \textbf{Fundamental Approach Type} [24].
-
-\begin{enumerate}
-    \item \textbf{Learning Paradigms}: The literature shows an equal representation of \textbf{Supervised} (46.3\%) and \textbf{Unsupervised} (46.3\%) learning approaches [25]. \textbf{Reinforcement Learning} (RL) has seen limited exploration, accounting for only 7.4\% [25].
-    \item \textbf{Fundamental Approach Types}: While traditional \textbf{Template-Based} methods constituted a significant portion (29.3\%), there is a clear evolution toward \textbf{Deep Learning (DL)} solutions (43.9\%) in recent years [25]. This shift indicates the growing reliance on advanced AI models for tackling repair tasks [17].
-\end{enumerate}
-The dominant target programming language in APR research remains Java (68.3\%), suggesting potential for expansion into other languages [25].
-
-\subsection{Deep Learning and Large Language Models (LLMs) in Repair}
-
-Deep Learning (DL) methods represent the current frontier in APR, aiming to enhance software reliability and maintainability by automatically generating patches [166].
-
-\subsection{Core DL Architectures and Tools}
-\begin{enumerate}
-    \item \textbf{T5APR (Text-To-Text Automated Program Repair)}: This is a novel neural program repair approach that provides a unified solution for bug fixing across multiple programming languages, including Java, Python, C, and JavaScript [162, 166]. T5APR leverages \textbf{CodeT5}, a powerful pre-trained text-to-text transformer model [163, 166]. It employs a \textbf{checkpoint ensemble strategy} during inference to improve patch recommendations [163, 166] and works by generating candidate patches based on learned contextual information, which are then validated by test cases [164].
-    \item \textbf{DeepFix}: This tool addresses common C programming errors using a multilayered sequence-to-sequence neural network with attention, often trained on student-submitted erroneous programs. DeepFix can achieve significant success in automated bug fixing without external error localization tools, relying on compiler-verified iterative corrections [32, 49].
-    \item \textbf{CodeBERT}: This is a bimodal pretrained model built on a transformer architecture, utilizing a hybrid objective function that combines masked language modeling with token detection to understand both programming and natural languages [32].
-\end{enumerate}
-
-\subsection{Effectiveness by Bug Type}
-Deep Learning techniques have proven highly effective for certain bug categories. For instance, \textbf{Syntax errors} exhibit the highest success rate (90–95\%) among all bug types addressed by APR. This success is often attributed to specialized tools like \emph{SynFix} (which uses LSTM networks) and \emph{Sensibility} (which uses n-gram models) [41].
-
-\subsection{Advanced Paradigms and Optimization}
-
-Current research directions focus on improving the accuracy, efficiency, and context-awareness of AI-based APR systems [19].
-
-\subsubsection{Context-Aware APR}
-A crucial approach involves developing context-aware APR systems that improve repair accuracy by utilizing diverse information such as bug reports, code surroundings, and semantic relationships [19, 49].
-\begin{itemize}
-    \item \textbf{iFixR}: Automates repairs by mining and clustering fix patterns from active project repositories, leveraging bug-fixing commits and prioritizing patches that match successful historical repairs [31, 49].
-    \item \textbf{CURE}: Employs a fine-tuned transformer model to capture the rich context of code snippets, utilizing the attention mechanism to capture long-range dependencies and semantic relationships for semantically coherent repairs [49].
-    \item \textbf{DeepFix} and \textbf{SimFix}: DeepFix captures contextual information by processing code segments sequentially using an encoder-decoder architecture, while SimFix combines existing patches and similar code snippets based on the error context [49].
-\end{itemize}
-
-\subsection{Hybrid and Resource-Efficient Approaches}
-The goal of resource efficiency (RQ3) aims to make DL-based APR more accessible for practical applications through techniques like transfer learning, model compression, and hybrid analysis [19, 47, 48].
-
-\begin{itemize}
-    \item \textbf{Hybrid Approaches}: Systems like \textbf{RewardRepair} adopt a Neural Machine Translation (NMT) approach, integrating both syntactic (code context-aware learning) and semantic (compilation and test execution feedback) information to ensure patches are syntactically correct and semantically valid [45, 47].
-    \item \textbf{LLM Optimization}: Leveraging large language models (LLMs) has led to resource-efficient tools, such as \textbf{PyDex} (which uses multi-modal prompts and iterative querying, achieving a high repair rate of 96.5\% using few-shot learning) and \textbf{RepairCAT} (which fine-tunes the StarCoder-1B model) [47].
-    \item \textbf{Optimization Strategies}: Techniques such as iterative repair paradigms (like \textbf{ITER}), transfer learning for specialization (like \textbf{VRepair} for vulnerability repair), and two-stage approaches (like \textbf{CodeReviser}) are used to optimize resource usage and computational overhead [47]. Transfer learning and model compression are essential for developing effective, scalable, and efficient DL-based APR solutions [48].
-\end{itemize}
+The theoretical framework governing modern automated software development centers on the integration of Large Language Models (LLMs) into two core research areas: Automated Program Repair (APR) and code generation ~\cite{anand2024}. Crucially, this framework must also incorporate mechanisms for assessing the quality and semantic correctness of AI-generated repairs, particularly when dealing with complex issues like concurrency bugs ~\cite{anand2024}
+.
+\subsection*{The Evolution of Automated Program Repair (APR) and LLMs}
+Automated Program Repair (APR) and code generation have been fundamental topics in software development, aiming to reduce the time and resources required for identifying and fixing code defects ~\cite{anand2024,dikici2025}
+. The emergence of Large Language Models (LLMs) has profoundly reshaped these domains, providing powerful new tools for both tasks ~\cite{anand2024,yang2025}
+.
+LLMs, often pre-trained on massive datasets with billions of parameters, exhibit capabilities such as understanding code structure and generating code based on natural language requests ~\cite{anand2024}
+. This has led to significant improvements in the quality and speed of automating programming tasks, including bug fixing in pre-existing code and understanding complex repositories ~\cite{anand2024}
+.
+Traditional APR techniques relied on methods such as Abstract Syntax Trees (ASTs), heuristics for ranking patches, patterns, and context-matching ~\cite{anand2024}
+. These have evolved into learning-based APR methods, which include sophisticated models like CodeT5, GraphCodeBERT, and Codex ~\cite{anand2024,yang2023}. Modern research has divided APR techniques broadly into four categories: Heuristic-based, Template-based, Constraint-based, and Learning-based, with LLMs representing the latest advancement in the latter category ~\cite{yang2023}
+.
+\subsection*{Taxonomy of LLM-based Automated Program Repair (LLM-APR)}
+LLM-based APR (LLM-APR) systems are categorized into four primary design paradigms, distinguished by how they manage the interplay between model parameters and the control flow of the repair process ~\cite{yang2025}
+:
+\begin{enumerate} \item \textbf{Fine-Tuning (FT):} This approach adapts a pre-trained LLM by updating its weights using bug-fix data ~\cite{yang2025}
+. Fine-tuning (FT) strategies include Parameter-Efficient Fine-Tuning (PEFT), Reinforcement Learning Fine-Tuning (RLFT), and Knowledge Distillation ~\cite{yang2025}. FT typically delivers strong task alignment and high accuracy but demands significant GPU resources ~\cite{yang2025}. \item \textbf{Prompting:} The LLM operates as a frozen component, generating a complete patch after a single query ~\cite{yang2025}. This paradigm enables rapid deployment but its efficiency is heavily dependent on the quality of the prompt design and the limits of the context window ~\cite{yang2025}. Prompting encompasses zero-shot and few-shot methods ~\cite{yang2025}. \item \textbf{Procedural Pipelines:} This involves embedding LLM inferences within fixed, scripted, multi-step workflows ~\cite{yang2025}. This structure ensures reproducible outcomes and includes approaches like Test-in-the-Loop, which alternates generation with unit tests, and Human-in-the-Loop pipelines, which incorporate developer input or hints ~\cite{yang2025}. \item \textbf{Agentic Frameworks:} In this highly autonomous paradigm, the language model determines the next repair step (e.g., planning, tool invocation, termination) rather than following a fixed script ~\cite{yang2025}. Agentic frameworks, such as Tool-Augmented Agents and LLM-as-Judges, are capable of tackling complex, multi-hunk, or cross-file bugs, though at the cost of increased latency and complexity ~\cite{yang2025}
+. \end{enumerate}
+Furthermore, all paradigms can be enhanced by two crucial augmentation layers ~\cite{yang2025}
+: \begin{itemize} \item \textbf{Retrieval-Augmented Generation (RAG):} Augmenting the LLM's input with external knowledge, such as relevant code snippets, documentation, or historical fixes, to ground the patch in concrete domain information ~\cite{yang2025}. \item \textbf{Analysis-Augmented Generation (AAG):} Incorporating results from program analysis (static or dynamic), such as error traces, failing test logs, or data-flow facts, to guide the model toward the root cause ~\cite{yang2025}
+. \end{itemize}
+\subsection*{Defect Classification and Quality Assessment in AI Systems}
+The quality assessment of software repairs, especially those performed by AI systems, necessitates specialized frameworks because conventional defect analysis models fail to capture the unique attributes of AI, such as data dependencies, adaptive learning processes, and decision-making logic ~\cite{alannsary2025}
+.
+The proposed AIODC framework, an adaptation of the Orthogonal Defect Classification (ODC) paradigm, addresses this gap by introducing AI-specific classification dimensions: Data, Learning, and Thinking ~\cite{alannsary2025}
+. \begin{itemize} \item Defects occurring during the Learning phase are frequently the most prevalent and are significantly linked to high-severity classifications ~\cite{alannsary2025}. \item Defects identified in the Thinking phase disproportionately affect the system's trustworthiness and accuracy ~\cite{alannsary2025}
+. \end{itemize}
+Beyond classifying the origin of the defect, a comprehensive evaluation framework for APR tools must critically assess the repair outcome by scrutinizing three main areas, as demonstrated by studies like the one conducted on Sorald ~\cite{liyanage2025}
+: \begin{enumerate} \item \textbf{Introduction of New Errors:} Assessing the extent to which automated repairs introduce unintended side effects, such as new bugs or code smells ~\cite{liyanage2025}. \item \textbf{Preservation of Functionality:} Verifying that the repair preserves the original code semantics and functional behavior, typically by running pre-existing unit tests on the patched code ~\cite{liyanage2025}. \item \textbf{Degradation of Code Structure:} Evaluating the impact of the repair on code quality metrics (e.g., complexity, cohesion) using metrics like LOC, WMC, and LCOM1 ~\cite{liyanage2025}. Repairs that increase LCOM1, LOC, and WMC are generally found to degrade code structure ~\cite{liyanage2025}
+. \end{enumerate}
+\subsection*{The Challenge of Concurrency Bugs and Verification}
+A major challenge in software engineering, intensified by the prevalence of multi-core hardware, is the verification and repair of concurrency issues, such as data races, deadlocks, and synchronization errors ~\cite{jain2025,abbaspour2016}
+. Concurrent programming is inherently non-deterministic, making testing and debugging notoriously difficult ~\cite{jain2025,chang2021,abbaspour2016}
+.
+The verification of concurrent programs is further complicated by the use of Relaxed Memory Models (RMMs), such as Total Store Order (TSO) and Partial Store Order (PSO), which define how memory operations are ordered and observed across different threads in modern architectures (e.g., ARM, x86) ~\cite{jain2025}
+.
+LLMs are being evaluated for their capacity in this domain by assessing their ability to: \begin{itemize} \item Understand and summarize concurrent programs ~\cite{jain2025}
+. \item Identify concurrency issues like data races and deadlocks under the Sequentially Consistent (SC) memory model ~\cite{jain2025}. \item Predict correct program behaviors and verify correctness conditions across both SC and RMMs (TSO and PSO) ~\cite{jain2025}. \end{itemize} While LLMs, especially GPT-4, demonstrate natural language reasoning strengths, they still perform weaker than dedicated verification tools in handling RMMs and often fail to accurately explain the causal relationships of complex concurrency failures ~\cite{jain2025}. Dedicated concurrency benchmarks, such as SV-COMP's \texttt{pthread} tests and ARM Litmus tests, are necessary to evaluate these capabilities rigorously ~\cite{jain2025}.
