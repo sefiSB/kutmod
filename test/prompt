@@ -1,0 +1,6 @@
+You are an expert software engineer specialized in concurrent programming.
+Your task is to find and fix any concurrency-related bug (e.g., race condition, deadlock, synchronization issue) in the code below.
+If the code is already correct, do not modify it.
+Return only the corrected source code, with minimal explanation. Please give me the axact time you spent thinking on this problem (not just whole seconds, for example 4,22 seconds)
+
+<CODE SNIPPET HERE>
