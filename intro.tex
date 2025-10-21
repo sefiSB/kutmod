@@ -21,11 +21,17 @@ A critical focus is placed on the need for comprehensive evaluation methodologie
 \begin{enumerate}
     \item \textbf{Verifying Semantic Correctness}: Ensuring that a patch maintains the intended code functionality, particularly beyond the limited coverage provided by test suites~\cite{yang2025}.
     \item \textbf{Mitigating Side Effects and New Errors}: Preventing the automated introduction of new bugs, security vulnerabilities, or code violations during the repair process~\cite{yang2025}~\cite{liyanage2025}. For example, studies on the Java repair tool Sorald showed that while it achieved a high fix rate for targeted issues, it simultaneously introduced a large number of new violations, including several bugs and numerous code smells, highlighting a critical absence of semantic and stylistic understanding in the repair mechanism~\cite{liyanage2025}.
-    \item \textbf{Preventing Code Structure Degradation}: Automated repairs often negatively affect code quality by increasing metrics related to complexity and reducing cohesion (e.g., increasing LCOM1, WMC, and Lines of Code), which makes the code harder to understand and maintain~\cite{liyanage2025}.
+    \item \textbf{Preventing Code Structure Degradation}: Automated repairs often negatively affect code quality by increasing metrics related to complexity and reducing cohesion (e.g., increasing LCOM1, WMC, and Lines of Code), which makes the code harder to understand and maintain~\cite{liyanage2025}. However this is outside the scope of this study.
 \end{enumerate}
 
 Addressing these challenges is crucial for transitioning LLM-based APR from prototypes to reliable and efficient components of continuous integration and development practices~\cite{yang2025}.
 
 \subsection{Scope of This Study}
-
-This study aims to bridge the gap between the revolutionary potential of LLM-APR and the complex, specialized demands of concurrent program repair~\cite{jain2025}. Leveraging the established taxonomy of LLM-APR paradigms—including Fine-Tuning, Prompting, Procedural Pipelines, and Agentic Frameworks, often augmented by Retrieval-Augmented Generation (RAG) or Analysis-Augmented Generation (AAG)—we specifically investigate their efficacy in identifying and resolving critical concurrency issues, particularly data races and deadlocks~\cite{yang2025}~\cite{upadhyay2023}~\cite{kelk2013}. Crucially, recognizing that highly capable LLMs often struggle in specialized, complex domains, our analysis extends to verification performance under Relaxed Memory Models (RMMs), such as Total Store Order (TSO) and Partial Store Order (PSO), where traditional memory consistency assumptions fail~\cite{jain2025}. Beyond evaluating simple bug-fixing rates, this work employs a comprehensive methodology to rigorously assess patches for semantic correctness, the potential introduction of new errors (side effects) (such as introducing new race conditions or bugs), and any degradation of code structure caused by automated repairs, thereby providing actionable insights for developing robust and reliable LLM-based tools for complex concurrent environments~\cite{liyanage2025}.
+This study aims to provide a systematic and rigorous empirical evaluation of the APR capabilities of available LLMs (ChatGPT, Claude, Gemini, DeepSeek and Copilot) when confronted with concurrent programming problems.
+To thoroughly assess the performance of these models, the scope of this study focuses on three critical evaluation dimensions: 
+\begin{enumerate}
+    \item Patch Accuracy (Correctness)
+    \item Newly Introduced Bugs (Side Effects)
+    \item Time of Reply (Efficiency) 
+\end{enumerate}
+The experimental design utilizes a structured dataset of concurrent code snippets featuring varying levels of complexity, specifically containing 1, 3, and 5 bugs. This approach ensures the ability to compare performance on simple versus complex (multi-hunk) defects. The entire set of tests will be executed with all available LLMs to provide a direct and robust comparative analysis of their specialized capabilities in addressing concurrency-related software defects.
