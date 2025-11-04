@@ -1,0 +1,119 @@
+kutmod eloadas
+
+1. dia
+
+bulletpoint1:
+ APR: A transformative approach to bug fixing.	
+
+"Good afternoon. We are here to present our empirical evaluation of Automated Program Repair, or APR. This is a transformative approach aimed at reducing the time and resources required to identify and fix bugs."
+
+bulletpoint2:
+The shift from Deep Learning to the LLM Revolution.
+
+"The field has evolved from earlier methods to Deep Learning techniques, capable of analyzing semantic code context. But today, we are undergoing a radical shift driven by the LLM Revolution."
+
+
+bulletpoint3:
+LLM-APR: High performance, minimal human intervention.
+
+"LLM-based APR systems, trained on massive datasets, demonstrate impressive performance, allowing them to fix program bugs with minimal human intervention."
+
+
+
+2. dia
+
+bulletpoint1:
+concurrency
+
+This study focuses on a critical domain: Concurrent Programming. While essential for modern performance, concurrency is notorious for its non-deterministic nature, making verification one of the most difficult tasks in development
+
+bulletpoint2:
+key issues
+
+The key problems are well-known: deadlocks, synchronization errors, and, critically, race conditions
+
+
+bulletpoint3:
+LLM-Weaknesses
+
+Here is the core challenge for LLMs: While capable of handling basic issues, our research confirms that they struggle significantly with the intricacies of Relaxed Memory Models (RMM), such as Total Store Order. They often fail to capture complex memory ordering constraints
+
+
+3. dia
+
+bal oszlop:
+Focus: Comprehensive evaluation, beyond mere bug fixing.
+"Evaluating APR tools must go beyond simply reporting fix rates. We must focus on the potential negative consequences."
+
+középső oszlop:
+Persistent Challenges: 1. Verifying Semantic Correctness. 2. Mitigating Side Effects/New Errors.
+"The two persistent challenges are ensuring Semantic Correctness—that the patch does what it should—and mitigating Side Effects. Studies, for example with the tool Sorald, showed that while fixing targeted issues, it introduced thousands of new faults."
+
+jobb oszlop:
+Study Dimensions: 1. Patch Accuracy, 2. Newly Introduced Bugs, 3. Time of Reply.
+"Therefore, our study provided a rigorous empirical evaluation focusing on these three critical dimensions: Patch Accuracy, Newly Introduced Bugs, and Time of Reply, or efficiency."
+
+
+
+
+4. dia - Methodology and metrics
+
+Challenge: Inherent non-determinism and thread interleavings.
+"To address these challenges, our methodology was designed around concurrency's inherent non-determinism."
+
+Program Corpus: 150 buggy concurrent programs, comparing simple vs. complex (multi-hunk) defects.
+"We used a corpus of 150 buggy concurrent programs. Critically, this dataset assessed repair capability across varying complexity, specifically comparing simple 1-bug issues against complex multi-hunk defects with 3 or 5 bugs."
+
+Testing Oracle: Exhaustive Tests for patch validation.
+"For validation, we used an oracle of exhaustive tests. This is crucial for concurrent software to ensure the fix reliably eliminates non-deterministic faulty interleavings, rather than just masking the bug."
+
+Core Metrics: Accuracy (Effectiveness), Side Effects (Robustness), Time (Efficiency).
+"Our three core metrics derived from these needs are Accuracy (Effectiveness), Side Effects (Robustness), and Time of Reply (Efficiency)."
+
+
+5. dia -  Key Results I: Gemini vs. Complexity
+
+Data: 1-bug 73.41% accuracy,5-bug: 5-bug (multi-hunk): 99.6% accuracy.
+"While 1-bug problems yielded 73% accuracy, its performance reached a remarkable 99.6% fixation rate for the most complex, 5-bug defects. This is a near-perfect result on multi-hunk concurrency problems."
+
+Contrast: ChatGPT models consistently lagged (e.g., 81.06% on 3-bug).	"In stark contrast, competing models like ChatGPT consistently lagged, failing to scale their domain expertise effectively."
+
+Gemini-1.5-Pro demonstrates Superior Scalability.
+"Now for the results! As Figure 1 visually demonstrates, Gemini-1.5-Pro is the best candidate due to its superior ability to scale accuracy with bug complexity."
+
+Accuracy increases with complexity (inverse correlation).
+"We observed an inverse correlation: the accuracy actually increased with complexity, suggesting strong context utilization."
+
+
+
+
+6. dia - Results II
+
+Robustness: Low Newly Introduced Bug rate (only 1 new bug for 5-bug tests).
+"Beyond accuracy, Gemini also demonstrated robust performance, maintaining high patch integrity. It showed a very low rate of introducing new bugs—only a single instance in the 5-bug tests."
+
+Critical Finding: GPT models are the least reliable for concurrency verification.
+"However, the most critical finding concerns the GPT-based models. They present themselves as the worst choice for concurrency verification tasks."
+
+Fundamental Failure: Inability to handle RMM verification.
+"This is due to their fundamental and critical weakness in verifying program correctness under Relaxed Memory Models. Figure 2 clearly illustrates this functional gap."
+
+Consequence: Risks subtle semantic errors or overfitting to SC models, leading to plausible but incorrect patches.
+"This inability means any patch generated by GPT for an RMM-based bug—a common occurrence in the real world—risks introducing subtle semantic errors, leading to plausible but ultimately incorrect patches."
+
+
+7. dia - Conslusion
+
+Conclusion: Gemini-1.5-Pro is the optimal choice for complex concurrent APR.
+"In conclusion, our empirical data strongly suggests that the Gemini-1.5-Pro model is the optimal choice for addressing complex concurrent defects, due to its superior accuracy and robustness."
+
+RMM deficiency
+"However, the RMM deficiency remains a significant threat to the reliability of patches generated by all evaluated LLMs."
+
+Future Focus: Analysis-Augmented Generation (AAG).
+"Therefore, future research must focus on bridging this gap through effective Analysis-Augmented Generation, or AAG."
+
+Goal: Integrate formal verification to create RMM-aware APR systems.
+"We advocate for using LLMs as a complement to, rather than a replacement for, specialized formal verification tools. Integrating domain-specific knowledge will enable LLMs to reason reliably, transforming them into verifiably correct concurrency repair agents."
+
+
