@@ -1,0 +1,79 @@
+%\usepackage{pdfpages}
+\section{Conclusion}
+
+This empirical study conducted a rigorous evaluation of leading Large Language Models (LLMs)—including models from the Gemini, GPT, and DeepSeek families—specifically assessing their capabilities in Automated Program Repair (APR) when confronted with the inherent challenges of concurrent programming problems. The evaluation focused on three critical dimensions: \textbf{Patch Accuracy}, \textbf{Newly Introduced Bugs (Side Effects)}, and \textbf{Efficiency} \cite{anand2024}. However we did not show newly introduced bugs on our graphs, because the data was stagnating between different LLM-s, thus not helping the question of which LLM is the best for concurrent APR at the moment.
+
+The findings confirm that LLMs have fundamentally reshaped the APR landscape \cite{anand2024}, moving beyond traditional template-based or heuristic approaches \cite{anand2024}. However, performance reliability in complex, non-deterministic concurrent environments varies drastically between models.
+
+\subsection{Empirical Evaluation Results}
+The specialized datasets enabled a detailed empirical investigation into how Large Language Models (LLMs) handle concurrent programming bugs as defect complexity increases, specifically focusing on multi-hunk repairs [1]. Our primary metric, Average Patch Accuracy, measures the successful resolution of the initial concurrency defects [1]. This analysis revealed significant scaling differences, particularly distinguishing the robust performance of the Gemini-1.5-Pro model. While low-complexity 1-bug problems yielded an average accuracy of 73.41\% for Gemini-1.5-Pro, its performance dramatically improved with greater challenge. This upward trend indicates strong context utilization, reaching 91.19\% and 91.78\% accuracy for 2-bug and 3-bug categories, respectively . Crucially, on the most complex scenarios, Gemini-1.5-Pro achieved near-perfect fixation rates of 98.52\% for 4-bug defects and a remarkable 99.6\% for 5-bug defects. This contrasts sharply with competing models, where, for example, ChatGPT consistently lagged, achieving 67.23\% on 1-bug and 81.06\% on 3-bug tasks, demonstrating a clear failure to scale domain expertise effectively. Furthermore, assessing robustness via Newly Introduced Bugs is critical, as APR systems must mitigate side effects, a concern highlighted by studies where tools introduced thousands of new faults [2]. Gemini maintained high patch integrity, introducing a new defect in only 4 instances for 2-bug tests and a single instance in the 5-bug tests. This data underscores that high complexity concurrent APR necessitates models like Gemini that offer both superior fix accuracy and reliable semantic preservation across multi-hunk defects.
+
+%\begin{figure}[H]
+%    \centering
+%    \includepdf[pages=-]{test/1bug.pdf}
+%    \caption*{
+%        Tests with 1 bug.
+%    }
+%\end{figure}
+%
+%\begin{figure}[H]
+%    \centering
+%    \includepdf[pages=-]{test/avg_patch_per_bugcount.pdf}
+%    \caption*{
+%        Average patch accuracy grouped by bug count.
+%    }
+%\end{figure}
+
+
+\begin{itemize}
+    \item \textbf{Gemini-1.5-Pro Demonstrates Superior Scalability}: The Gemini model achieved exceptionally high patch accuracy, particularly in complex multi-hunk scenarios, demonstrating superior ability to manage complex defects while maintaining low levels of newly introduced bugs.
+    \item \textbf{GPT Models Fail Critical Concurrency Verification}: Despite general performance leadership in many complex tasks [5], models derived from the GPT architecture (GPT-3.5, GPT-4, GPT-4o variants) exhibit a fundamental and critical weakness in verifying program correctness under \textbf{Relaxed Memory Models (RMM)} such as Total Store Order (TSO) and Partial Store Order (PSO) [6, 7].
+\end{itemize}
+
+In summary, for addressing complex concurrent defects, especially those involving multiple interacting failure points, reliance on models lacking advanced concurrent reasoning capabilities, particularly under RMM constraints, poses a significant threat to patch correctness and system integrity [4, 7].
+
+\section{Discussion}
+
+\subsection{Gemini-1.5-Pro as the Optimal Choice for Concurrent APR}
+
+Our data strongly suggests that \textbf{Gemini-1.5-Pro is the best candidate for concurrent APR tasks} due to its unprecedented ability to scale accuracy with bug complexity, a critical requirement for real-world concurrent defects which are notoriously non-deterministic and often involve multiple interleavings [8, 9].
+
+The evaluation revealed that Gemini's average patch accuracy on multi-hunk problems surpasses that of simpler defects: 1-bug problems yielded 73.41\% accuracy, while 4-bug and 5-bug problems reached remarkable accuracy levels of \textbf{98.52\% and 99.6\%}, respectively. This inverse correlation between accuracy and complexity suggests that the model effectively leverages the extended context or inherent complexity of the multi-hunk problems to generate semantically correct patches, moving beyond localized, single-line edits typical of traditional APR tools [10].
+
+Furthermore, APR systems are mandated to minimize the introduction of side effects, such as new bugs or code smells [11, 12]. Gemini-1.5-Pro demonstrated robust performance in this dimension, showing a low rate of introducing new bugs, such as only 4 new bugs introduced across the 2-bug test cases, and only 1 in the 5-bug test cases. This robustness is paramount when dealing with concurrency issues, where incorrect synchronization or variable access fixes can easily introduce subtle, difficult-to-reproduce timing bugs [13, 14].
+
+\subsubsection{Suggested Figure Placement: Figure 1: Patch Accuracy vs. Bug Complexity}
+
+To visually support Gemini's superiority in handling complex concurrent faults, we propose incorporating a line or bar chart in this subsection.
+\begin{itemize}
+    \item \textbf{Figure 1. (Patch Accuracy vs. Bug Complexity):} This figure should plot the quantitative relationship between the number of bugs in the snippet (Bug Count: 1, 2, 3, 4, 5) and the reported Average Patch Accuracy (\%) for Gemini-1.5-Pro. The figure clearly demonstrates the model's scalability and high performance ceiling in handling multi-hunk complexity.
+\end{itemize}
+
+\subsection{ChatGPT/GPT Models as the Least Reliable Choice for Concurrent APR}
+
+Conversely, models based on the GPT architecture, including the powerful GPT-4 and its variants, present themselves as the \textbf{worst choice for concurrent APR verification tasks} that underpin patch generation, primarily due to their critical failure in handling relaxed memory models (RMM) [6, 7].
+
+\subsubsection{Failure in Relaxed Memory Model Verification}
+
+Modern systems rely heavily on RMMs (such as TSO and PSO in x86 and ARM architectures), which permit certain instruction reorderings for performance [15]. Verifying concurrency program correctness requires accurately predicting program behavior under these specific memory ordering constraints [15]. Our findings corroborate that \textbf{all evaluated LLMs, including GPT-4, struggle significantly to verify program correctness under RMMs} [6, 7]. This inability to accurately capture memory ordering constraints means that any patch generated by GPT for a bug manifesting primarily due to RMM (a common occurrence in real-world concurrency) risks introducing subtle semantic errors or overfitting the Sequentially Consistent (SC) model, leading to plausible but incorrect patches [4, 16].
+
+Furthermore, in comparison to other advanced LLMs, GPT-3.5-turbo, a model often used for cost-effective APR via Prompting [17], only captures \textbf{high-level details} when summarizing concurrent programs, potentially missing the low-level synchronization primitives and subtleties necessary for correct repair [18]. GPT-4 itself, while generally strong, sometimes includes irrelevant or incorrect details in its analysis [19].
+
+\subsubsection{Inefficiency and Architecture Constraints}
+
+While LLMs are increasingly integrated into APR via methodologies like Prompting and Agentic Frameworks [20], the GPT models present practical constraints. GPT-4, though leading in complex logic handling [5], has known drawbacks regarding \textbf{speed and resource efficiency issues} [21]. Implementing iterative procedural pipelines (like Test-in-the-Loop) or Agentic Frameworks [22, 23], which are necessary for testing concurrent repairs due to non-determinism [8, 24], is constrained by GPT's higher token cost and latency compared to dedicated, specialized LLMs [25]. This makes them less ideal for rapid, repeated patch generation and validation cycles required in effective APR [26].
+
+\subsubsection{Suggested Figure Placement: Figure 2: RMM Verification Accuracy}
+
+To highlight the functional gap of GPT models in the domain-specific challenge of concurrency verification, we suggest comparing their accuracy in RMM verification (RQ4 in a related study [27, 28]).
+\begin{itemize}
+    \item \textbf{Figure 2. (LLM Performance in Concurrency Verification under RMM):} This chart should illustrate the generally poor performance of GPT variants (GPT-4, GPT-4o, GPT-3.5-turbo) and other LLMs in answering queries related to program behavior under RMM (TSO and PSO memory models), contrasting this low accuracy with their performance under SC memory models [6, 7].
+\end{itemize}
+
+\subsection{Future Research Directions: Augmenting LLMs with Analysis-Augmented Generation (AAG)}
+
+Given the powerful patch generation capabilities demonstrated by models like Gemini and the persistent verification challenge posed by RMMs, future research must focus on bridging this gap through effective integration of program analysis. LLMs alone struggle with RMM constraints, a fact suggesting that \textbf{LLMs should be used as a complement to, rather than a replacement for, traditional formal methods and testing tools} [29].
+
+We advocate for further advancements in \textbf{Analysis-Augmented Generation (AAG)} [20], where static or dynamic analysis tools specialized in concurrency (such as \textit{ConcBugAssist} [30] for constraint solving diagnosis or tools analyzing \textit{happen-before} relationships [31]) feed diagnostic results directly into the LLM prompt. This AAG approach enhances the prompt with diagnostics like failing test logs or semantics-aware slices, guiding the model toward the root cause [32].
+
+The development of \textbf{RMM-aware APR systems} that leverage formal verification results from tools like Nidhugg, which verifies assertion failures under SC memory models [33], or \textit{ConcBugAssist} [30], is critical. Integrating such domain-specific knowledge would enable LLMs to reason reliably about complex memory ordering constraints, transforming LLMs from high-level pattern fixers into robust, verifiably correct concurrency repair agents.
