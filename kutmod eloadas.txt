@@ -70,8 +70,12 @@ Testing Oracle: Exhaustive Tests for patch validation.
 Core Metrics: Accuracy (Effectiveness), Side Effects (Robustness), Time (Efficiency).
 "Our three core metrics derived from these needs are Accuracy (Effectiveness), Side Effects (Robustness), and Time of Reply (Efficiency)."
 
+5. dia
+A legfontosabb diagram amit létrehoztunk. Ez mutatja meg, hogy a gemini szinte konstansan túlteljesti az többi LLM-et
 
-5. dia -  Key Results I: Gemini vs. Complexity
+
+
+6. dia -  Key Results II: Gemini vs. Complexity
 
 Data: 1-bug 73.41% accuracy,5-bug: 5-bug (multi-hunk): 99.6% accuracy.
 "While 1-bug problems yielded 73% accuracy, its performance reached a remarkable 99.6% fixation rate for the most complex, 5-bug defects. This is a near-perfect result on multi-hunk concurrency problems."
